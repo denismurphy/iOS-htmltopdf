@@ -15,13 +15,16 @@
 #import "NDHTMLtoPDF.h"
 #import <WebKit/WebKit.h>
 
-@interface NDHTMLtoPDF ()<WKNavigationDelegate>
+#define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
+
+@interface NDHTMLtoPDF ()<WKNavigationDelegate, UIWebViewDelegate>
 
 @property (nonatomic, strong) NSURL *URL;
 @property (nonatomic, strong) NSString *HTML;
 @property (nonatomic, strong) NSString *PDFpath;
 @property (nonatomic, strong) NSData *PDFdata;
-@property (nonatomic, strong) WKWebView *webview;
+@property (nonatomic, strong) WKWebView *wkWebview;
+@property (nonatomic, strong) UIWebView *uiWebview;
 @property (nonatomic, assign) CGSize pageSize;
 @property (nonatomic, assign) UIEdgeInsets pageMargins;
 
@@ -35,7 +38,7 @@
 
 @implementation NDHTMLtoPDF
 
-@synthesize URL=_URL,webview,delegate=_delegate,PDFpath=_PDFpath,pageSize=_pageSize,pageMargins=_pageMargins;
+@synthesize URL=_URL,wkWebview=_wkWebview,uiWebview=_uiWebview,delegate=_delegate,PDFpath=_PDFpath,pageSize=_pageSize,pageMargins=_pageMargins;
 
 // Create PDF by passing in the URL to a webpage
 + (id)createPDFWithURL:(NSURL*)URL pathForPDF:(NSString*)PDFpath delegate:(id <NDHTMLtoPDFDelegate>)delegate pageSize:(CGSize)pageSize margins:(UIEdgeInsets)pageMargins
@@ -140,46 +143,70 @@
     self.view.alpha = 0.0;
 }
 
+- (void)createWKWebView
+{
+    WKWebViewConfiguration *configuration = [[WKWebViewConfiguration alloc] init];
+    self.wkWebview = [[WKWebView alloc] initWithFrame:self.view.frame configuration:configuration];
+    self.wkWebview.navigationDelegate = self;
+
+    [self.view addSubview:self.wkWebview];
+
+    if (self.HTML == nil) {
+        [self.wkWebview loadRequest:[NSURLRequest requestWithURL:self.URL]];
+    }else{
+        [self.wkWebview loadHTMLString:self.HTML baseURL:self.URL];
+    }
+}
+
+- (void)createUIWebView
+{
+    self.uiWebview = [[UIWebView alloc] initWithFrame:self.view.frame];
+    self.uiWebview.delegate = self;
+    [self.view addSubview:self.uiWebview];
+
+    if (self.HTML == nil) {
+        [self.uiWebview loadRequest:[NSURLRequest requestWithURL:self.URL]];
+    }else{
+        [self.uiWebview loadHTMLString:self.HTML baseURL:self.URL];
+    }
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
 
-    WKWebViewConfiguration *configuration = [[WKWebViewConfiguration alloc] init];
-    self.webview = [[WKWebView alloc] initWithFrame:self.view.frame configuration:configuration];
-    webview.navigationDelegate = self;
-    
-    [self.view addSubview:webview];
-    
-    if (self.HTML == nil) {
-        [webview loadRequest:[NSURLRequest requestWithURL:self.URL]];
-    }else{
-        [webview loadHTMLString:self.HTML baseURL:self.URL];
+    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"10"))
+    {
+        [self createWKWebView];
+    }
+    else
+    {
+        [self createUIWebView];
     }
 }
-- (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation
+
+- (void)didFinishLoad:(UIView *)webView
 {
-    if (webView.isLoading) return;
-    
     UIPrintPageRenderer *render = [[UIPrintPageRenderer alloc] init];
-    
+
     [render addPrintFormatter:webView.viewPrintFormatter startingAtPageAtIndex:0];
-        
+
     CGRect printableRect = CGRectMake(self.pageMargins.left,
-                                  self.pageMargins.top,
-                                  self.pageSize.width - self.pageMargins.left - self.pageMargins.right,
-                                  self.pageSize.height - self.pageMargins.top - self.pageMargins.bottom);
-    
+                                      self.pageMargins.top,
+                                      self.pageSize.width - self.pageMargins.left - self.pageMargins.right,
+                                      self.pageSize.height - self.pageMargins.top - self.pageMargins.bottom);
+
     CGRect paperRect = CGRectMake(0, 0, self.pageSize.width, self.pageSize.height);
-    
+
     [render setValue:[NSValue valueWithCGRect:paperRect] forKey:@"paperRect"];
     [render setValue:[NSValue valueWithCGRect:printableRect] forKey:@"printableRect"];
 
     self.PDFdata = [render printToPDF];
-    
+
     if (self.PDFpath) {
         [self.PDFdata writeToFile: self.PDFpath  atomically: YES];
     }
-    
+
     [self terminateWebTask];
 
     if (self.delegate && [self.delegate respondsToSelector:@selector(HTMLtoPDFDidSucceed:)])
@@ -188,33 +215,58 @@
     if(self.successBlock) {
         self.successBlock(self);
     }
-    
-
 }
 
-- (void)webView:(WKWebView *)webView didFailNavigation:(WKNavigation *)navigation withError:(NSError *)error
+- (void)webViewDidFinishLoad:(UIWebView *)webView
 {
     if (webView.isLoading) return;
+    [self didFinishLoad:webView];
+}
 
+- (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation
+{
+    if (webView.isLoading) return;
+    [self didFinishLoad:webView];
+}
+
+- (void)didFailToLoad
+{
     [self terminateWebTask];
 
     if (self.delegate && [self.delegate respondsToSelector:@selector(HTMLtoPDFDidFail:)])
         [self.delegate HTMLtoPDFDidFail:self];
-    
+
     if(self.errorBlock) {
         self.errorBlock(self);
     }
 }
 
+- (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error
+{
+    if (webView.isLoading) return;
+    [self didFailToLoad];
+}
+
+- (void)webView:(WKWebView *)webView didFailNavigation:(WKNavigation *)navigation withError:(NSError *)error
+{
+    if (webView.isLoading) return;
+    [self didFailToLoad];
+}
+
 - (void)terminateWebTask
 {
-    [self.webview stopLoading];
-    self.webview.navigationDelegate = nil;
-    [self.webview removeFromSuperview];
+    [self.wkWebview stopLoading];
+    self.wkWebview.navigationDelegate = nil;
+    [self.wkWebview removeFromSuperview];
+
+    [self.uiWebview stopLoading];
+    self.uiWebview.delegate = nil;
+    [self.uiWebview removeFromSuperview];
     
     [self.view removeFromSuperview];
     
-    self.webview = nil;
+    self.wkWebview = nil;
+    self.uiWebview = nil;
 }
 
 @end
