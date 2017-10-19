@@ -27,19 +27,22 @@
 - (IBAction)generatePDFUsingDelegate:(id)sender
 {
     self.resultLabel.text = @"loading...";
+
+    NDHTMLConfiguration *configuration = [[NDHTMLConfiguration alloc] initWithPageSize:kPaperSizeA4 pageMargins:UIEdgeInsetsMake(10, 5, 10, 5) renderingEngine:NDHTMLRenderingEngineWKWebView];
     
-    self.PDFCreator = [NDHTMLtoPDF createPDFWithURL:[NSURL URLWithString:@"http://edition.cnn.com/2012/11/12/business/china-consumer-economy/index.html?hpt=hp_c1"]
+    self.PDFCreator = [NDHTMLtoPDF createPDFWithURL:[NSURL URLWithString:@"https://edition.cnn.com/2012/11/12/business/china-consumer-economy/index.html?hpt=hp_c1"]
                                          pathForPDF:[@"~/Documents/delegateDemo.pdf" stringByExpandingTildeInPath]
                                            delegate:self
-                                           pageSize:kPaperSizeA4
-                                            margins:UIEdgeInsetsMake(10, 5, 10, 5)];
+                                      configuration:configuration];
 }
 
 - (IBAction)generatePDFUsingBlocks:(id)sender
 {
     self.resultLabel.text = @"loading...";
+
+    NDHTMLConfiguration *configuration = [[NDHTMLConfiguration alloc] initWithPageSize:kPaperSizeA4 pageMargins:UIEdgeInsetsMake(10, 5, 10, 5) renderingEngine:NDHTMLRenderingEngineUIWebView];
     
-    self.PDFCreator = [NDHTMLtoPDF createPDFWithURL:[NSURL URLWithString:@"http://edition.cnn.com/2013/09/19/opinion/rushkoff-apple-ios-baby-steps/index.html"] pathForPDF:[@"~/Documents/blocksDemo.pdf" stringByExpandingTildeInPath] pageSize:kPaperSizeA4 margins:UIEdgeInsetsMake(10, 5, 10, 5) successBlock:^(NDHTMLtoPDF *htmlToPDF) {
+    self.PDFCreator = [NDHTMLtoPDF createPDFWithURL:[NSURL URLWithString:@"https://edition.cnn.com/2013/09/19/opinion/rushkoff-apple-ios-baby-steps/index.html"] pathForPDF:[@"~/Documents/blocksDemo.pdf" stringByExpandingTildeInPath] configuration:configuration successBlock:^(NDHTMLtoPDF *htmlToPDF) {
         NSString *result = [NSString stringWithFormat:@"HTMLtoPDF did succeed (%@ / %@)", htmlToPDF, htmlToPDF.PDFpath];
         NSLog(@"%@",result);
         self.resultLabel.text = result;

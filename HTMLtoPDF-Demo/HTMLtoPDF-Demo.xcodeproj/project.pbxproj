@@ -20,6 +20,7 @@
 		19A2C6C71651029B00803EF5 /* NDViewController_iPhone.xib in Resources */ = {isa = PBXBuildFile; fileRef = 19A2C6C51651029B00803EF5 /* NDViewController_iPhone.xib */; };
 		19A2C6CA1651029B00803EF5 /* NDViewController_iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 19A2C6C81651029B00803EF5 /* NDViewController_iPad.xib */; };
 		19A2C6D2165102C500803EF5 /* NDHTMLtoPDF.m in Sources */ = {isa = PBXBuildFile; fileRef = 19A2C6D1165102C500803EF5 /* NDHTMLtoPDF.m */; };
+		F736DAA01F9961A100C0550C /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F736DA9F1F99619700C0550C /* WebKit.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,6 +43,7 @@
 		19A2C6C91651029B00803EF5 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/NDViewController_iPad.xib; sourceTree = "<group>"; };
 		19A2C6D0165102C500803EF5 /* NDHTMLtoPDF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NDHTMLtoPDF.h; path = ../NDHTMLtoPDF.h; sourceTree = "<group>"; };
 		19A2C6D1165102C500803EF5 /* NDHTMLtoPDF.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NDHTMLtoPDF.m; path = ../NDHTMLtoPDF.m; sourceTree = "<group>"; };
+		F736DA9F1F99619700C0550C /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -49,6 +51,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F736DAA01F9961A100C0550C /* WebKit.framework in Frameworks */,
 				19A2C6AB1651029B00803EF5 /* UIKit.framework in Frameworks */,
 				19A2C6AD1651029B00803EF5 /* Foundation.framework in Frameworks */,
 				19A2C6AF1651029B00803EF5 /* CoreGraphics.framework in Frameworks */,
@@ -80,6 +83,7 @@
 		19A2C6A91651029B00803EF5 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				F736DA9F1F99619700C0550C /* WebKit.framework */,
 				19A2C6AA1651029B00803EF5 /* UIKit.framework */,
 				19A2C6AC1651029B00803EF5 /* Foundation.framework */,
 				19A2C6AE1651029B00803EF5 /* CoreGraphics.framework */,
@@ -278,6 +282,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "HTMLtoPDF-Demo/HTMLtoPDF-Demo-Prefix.pch";
 				INFOPLIST_FILE = "HTMLtoPDF-Demo/HTMLtoPDF-Demo-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -289,6 +294,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "HTMLtoPDF-Demo/HTMLtoPDF-Demo-Prefix.pch";
 				INFOPLIST_FILE = "HTMLtoPDF-Demo/HTMLtoPDF-Demo-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
